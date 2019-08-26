@@ -1,50 +1,55 @@
 import pygame
-import random
 
 pygame.init()
 
-# VARIABLES
+################# VARIABLES #################
+# colors
 GREY = (152,152,152)
+BLUE = (0,87,128)
+
 WIDTH = 1024
 HEIGHT = 576
-global GreenBlockCreated
+blockWidth = 116
+blockHeight = 100
+greenBlockPositionX = WIDTH - WIDTH + 20
+greenBlockPositionY = HEIGHT * 0.7
+
 GreenBlockCreated = False
 
-#Ouverture de la fenêtre Pygame
+############### Pygame Window ###############
 window = pygame.display.set_mode((WIDTH, HEIGHT))
-
-#Images Load
 window.fill(GREY)#background
 
+#################Images Load ################
 bigHexRed = pygame.image.load("/home/ludwig/hexpace/bigHexRed.png").convert_alpha()
 bigHexBlue = pygame.image.load("/home/ludwig/hexpace/bigHexBlue.png").convert_alpha()
 bigHexGreen = pygame.image.load("/home/ludwig/hexpace/bigHexGreen.png").convert_alpha()
 bigHexViolet = pygame.image.load("/home/ludwig/hexpace/bigHexViolet.png").convert_alpha()
 bigHexWhite = pygame.image.load("/home/ludwig/hexpace/bigHexWhite.gif").convert_alpha()
 
-#OBJECT CLASS
+################### ARRAY ###################
+Plateau = [[None]*5 for i in range(7)]
+
+################### CLASS ###################
 class redBlock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexRed, (116, 100))
+        self.image = pygame.transform.scale(bigHexRed, (blockWidth, blockHeight))
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 10, HEIGHT * 0.1)  
 
 class blueBlock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        # sprite image
-        self.image = pygame.transform.scale(bigHexBlue, (116, 100))
-        # find the rectangle that encloses the image
+        self.image = pygame.transform.scale(bigHexBlue, (blockWidth, blockHeight))
         self.rect = self.image.get_rect()
-        # position the sprite on the screen
         self.rect.center = (WIDTH / 10, HEIGHT * 0.3) 
     
 class violetBlock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         # sprite image
-        self.image = pygame.transform.scale(bigHexViolet, (116, 100))
+        self.image = pygame.transform.scale(bigHexViolet, (blockWidth, blockHeight))
         # find the rectangle that encloses the image
         self.rect = self.image.get_rect()
         # position the sprite on the screen
@@ -53,14 +58,15 @@ class violetBlock(pygame.sprite.Sprite):
 class greenBlock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexGreen, (116, 100))
+        self.image = pygame.transform.scale(bigHexGreen, (blockWidth, blockHeight))
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 10, HEIGHT * 0.7) 
+        self.rect.center = (WIDTH / 20, HEIGHT * 0.7) 
 
     def update(self):
-        GreenBlock.rect = (pygame.mouse.get_pos())
+        mouseX, mouseY = pygame.mouse.get_pos()
+        GreenBlock.rect = (mouseX - (blockWidth/2),mouseY - (blockHeight/2))
 
-# Sprite Group
+################# Sprite Group #################
 all_sprites = pygame.sprite.Group()
 
 RedBlock = redBlock()
@@ -73,10 +79,11 @@ all_sprites.add(violetBlock)
 
 all_sprites.draw(window)
 
-#Rafraîchissement de l'écran
-pygame.display.flip()
+############### Refresh window ###############
+pygame.display.update()
 
-#MAIN LOOP
+#################################################
+################### MAIN LOOP ###################
 running = True
 while running:
     for event in pygame.event.get():    #Attente des événements
@@ -87,24 +94,36 @@ while running:
                 print('click gauche pressed')
                 mouseX, mouseY = pygame.mouse.get_pos()
                 print (mouseX, mouseY)
-                if mouseX > WIDTH / 10 and mouseX < WIDTH / 10 + 116 and mouseY > HEIGHT * 0.7 and mouseY < HEIGHT * 0.7 + 100:
+                if mouseX > greenBlockPositionX and mouseX < greenBlockPositionX + blockWidth and mouseY > greenBlockPositionY and mouseY < greenBlockPositionY + blockHeight:
                     print ('Detected')
+                    pygame.mouse.set_pos(greenBlockPositionX + (blockWidth/2), greenBlockPositionY + (blockHeight/2))
                     GreenBlock = greenBlock()
-                    GreenBlock.rect = GreenBlock.image.get_rect()
                     all_sprites.add(GreenBlock)                    
                     GreenBlockCreated = True
-                    GreenBlock.rect(mouseX-58,mouseY-50)
         if event.type == pygame.MOUSEBUTTONUP and GreenBlockCreated == True:
             GreenBlock.kill()
             GreenBlockCreated = False
-                     
-    # Update
+                 
+    ################### Update ###################
     all_sprites.update()
-    # Draw / render
+    #################### DRAW ####################
     window.fill(GREY)
+    window.blit(bigHexGreen, (greenBlockPositionX, greenBlockPositionY))
     all_sprites.draw(window)
-    window.blit(bigHexGreen, (WIDTH / 10, HEIGHT * 0.7))
-    # Refresh window
-    pygame.display.flip()
+    # Tableau
+    k=0
+    up=False
+    for i in range(7):
+        if up == True:
+            k+=50
+            up = False
+        else:
+            k-=50  
+            up = True  
+        for j in range(5):
+            Plateau[i][j] = pygame.draw.rect(window,BLUE,((i*100)+200,(j*100)+100+k,blockWidth/2,blockHeight/2))
+      
+    ############### Refresh window ###############
+    pygame.display.update()
 
 pygame.quit()
