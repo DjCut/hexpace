@@ -15,6 +15,7 @@ greenBlockPositionX = WIDTH - WIDTH + 20
 greenBlockPositionY = HEIGHT * 0.7
 
 GreenBlockCreated = False
+mouseHoverARectangle = False 
 
 ############### Pygame Window ###############
 window = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -28,7 +29,8 @@ bigHexViolet = pygame.image.load("/home/ludwig/hexpace/bigHexViolet.png").conver
 bigHexWhite = pygame.image.load("/home/ludwig/hexpace/bigHexWhite.gif").convert_alpha()
 
 ################### ARRAY ###################
-Plateau = [[None]*5 for i in range(7)]
+Plateau = [[None]*5 for i in range(7)]      
+PlateauBlock = [[None]*5 for i in range(7)]
 
 ################### CLASS ###################
 class redBlock(pygame.sprite.Sprite):
@@ -60,11 +62,13 @@ class greenBlock(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(bigHexGreen, (blockWidth, blockHeight))
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 20, HEIGHT * 0.7) 
+        self.rect.x = 0
+        self.rect.y = 0
 
     def update(self):
-        mouseX, mouseY = pygame.mouse.get_pos()
-        GreenBlock.rect = (mouseX - (blockWidth/2),mouseY - (blockHeight/2))
+        if GreenBlockCreated == True:
+            mouseX, mouseY = pygame.mouse.get_pos()
+            GreenBlock.rect = (mouseX - (blockWidth/2),mouseY - (blockHeight/2))
 
 ################# Sprite Group #################
 all_sprites = pygame.sprite.Group()
@@ -86,7 +90,7 @@ pygame.display.update()
 ################### MAIN LOOP ###################
 running = True
 while running:
-    for event in pygame.event.get():    #Attente des événements
+    for event in pygame.event.get():    
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -98,12 +102,33 @@ while running:
                     print ('Detected')
                     pygame.mouse.set_pos(greenBlockPositionX + (blockWidth/2), greenBlockPositionY + (blockHeight/2))
                     GreenBlock = greenBlock()
-                    all_sprites.add(GreenBlock)                    
+                    all_sprites.add(GreenBlock)    
                     GreenBlockCreated = True
         if event.type == pygame.MOUSEBUTTONUP and GreenBlockCreated == True:
-            GreenBlock.kill()
-            GreenBlockCreated = False
-                 
+            k=0
+            up=False
+            for i in range(7):               
+                if up == True:
+                    k+=50
+                    up = False
+                else:
+                    k-=50  
+                    up = True  
+                for j in range(5):
+                    if PlateauBlock[i][j] == None:
+                        if Plateau[i][j].collidepoint(pygame.mouse.get_pos()): 
+                            GreenBlock.rect = Plateau[i][j].move(-25,-25)
+                            print(Plateau[i][j])
+                            PlateauBlock[i][j] = GreenBlock
+                            GreenBlockCreated = False
+                        else:
+                            GreenBlock.kill()
+                            GreenBlockCreated = False
+                    else:
+                        print('A block is already here')   
+                        GreenBlock.kill()
+                        GreenBlockCreated = False     
+
     ################### Update ###################
     all_sprites.update()
     #################### DRAW ####################
@@ -121,8 +146,12 @@ while running:
             k-=50  
             up = True  
         for j in range(5):
-            Plateau[i][j] = pygame.draw.rect(window,BLUE,((i*100)+200,(j*100)+100+k,blockWidth/2,blockHeight/2))
-      
+            if PlateauBlock[i][j] != None:
+                all_sprites.add(PlateauBlock[i][j])
+            else:
+                Plateau[i][j] = pygame.draw.rect(window,BLUE,((i*87)+200,(j*100)+100+k,blockWidth/2,blockHeight/2))
+                
+    
     ############### Refresh window ###############
     pygame.display.update()
 
