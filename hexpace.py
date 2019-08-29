@@ -62,13 +62,15 @@ class greenBlock(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(bigHexGreen, (blockWidth, blockHeight))
         self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+        self.rect.center = (blockWidth/2, blockHeight/2)
+        self.condition = 5
+        self.storageCapacity = 1
+        self.refillSpeed = 1
 
     def update(self):
         if GreenBlockCreated == True:
             mouseX, mouseY = pygame.mouse.get_pos()
-            GreenBlock.rect = (mouseX - (blockWidth/2),mouseY - (blockHeight/2))
+            GreenBlock.rect.center = (mouseX,mouseY)
 
 ################# Sprite Group #################
 all_sprites = pygame.sprite.Group()
@@ -82,6 +84,10 @@ all_sprites.add(violetBlock)
 
 
 all_sprites.draw(window)
+
+############### Fonctions ###############
+def blockInfo():
+    
 
 ############### Refresh window ###############
 pygame.display.update()
@@ -104,6 +110,11 @@ while running:
                     GreenBlock = greenBlock()
                     all_sprites.add(GreenBlock)    
                     GreenBlockCreated = True
+                for i in range(7):
+                    for j in range(5):
+                        if PlateauBlock[i][j] != None:
+                            if PlateauBlock[i][j].rect.collidepoint(pygame.mouse.get_pos()):
+                                print(PlateauBlock[i][j].condition)
         if event.type == pygame.MOUSEBUTTONUP and GreenBlockCreated == True:
             k=0
             up=False
@@ -117,7 +128,7 @@ while running:
                 for j in range(5):
                     if PlateauBlock[i][j] == None:
                         if Plateau[i][j].collidepoint(pygame.mouse.get_pos()): 
-                            GreenBlock.rect = Plateau[i][j].move(-25,-25)
+                            GreenBlock.rect.center = Plateau[i][j].center
                             print(Plateau[i][j])
                             PlateauBlock[i][j] = GreenBlock
                             GreenBlockCreated = False
