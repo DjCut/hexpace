@@ -4,8 +4,8 @@ pygame.init()
 
 ################# VARIABLES #################
 # colors
-GREY = (152,152,152)
-BLUE = (0,87,128)
+GREY = (155,155,155)
+BLUE = (0,90,130)
 # display
 WIDTH = 1024
 HEIGHT = 576
@@ -35,10 +35,29 @@ window.fill(GREY)#color background
 
 #################Images Load ################
 bigHexRed = pygame.image.load("/home/ludwig/hexpace/bigHexRed.png").convert_alpha()
+bigHexRedRect = bigHexRed.get_rect()
+bigHexRedRect.x = redBlockPositionX
+bigHexRedRect.y = redBlockPositionY
+
 bigHexBlue = pygame.image.load("/home/ludwig/hexpace/bigHexBlue.png").convert_alpha()
+bigHexBlueRect = bigHexBlue.get_rect()
+bigHexBlueRect.x = blueBlockPositionX
+bigHexBlueRect.y = blueBlockPositionY
+
 bigHexGreen = pygame.image.load("/home/ludwig/hexpace/bigHexGreen.png").convert_alpha()
+bigHexGreenRect = bigHexGreen.get_rect()
+bigHexGreenRect.x = greenBlockPositionX
+bigHexGreenRect.y = greenBlockPositionY
+
 bigHexViolet = pygame.image.load("/home/ludwig/hexpace/bigHexViolet.png").convert_alpha()
+bigHexVioletRect = bigHexViolet.get_rect()
+bigHexVioletRect.x = violetBlockPositionX
+bigHexVioletRect.y = violetBlockPositionY
+
 bigHexWhite = pygame.image.load("/home/ludwig/hexpace/bigHexWhite.png").convert_alpha()
+bigHexWhiteRect = bigHexWhite.get_rect()
+bigHexWhiteRect.x = whiteBlockPositionX
+bigHexWhiteRect.y = whiteBlockPositionY
 
 ################### CLASS ###################
 class redBlock(pygame.sprite.Sprite):
@@ -57,7 +76,7 @@ class redBlock(pygame.sprite.Sprite):
     def update(self):
         if BlockCreating == True:
             mouseX, mouseY = pygame.mouse.get_pos()
-            dictBlockVariable[bigHexRed].rect.center = (mouseX,mouseY)
+            newBlock.rect.center = (mouseX,mouseY)
 
 class blueBlock(pygame.sprite.Sprite):
     def __init__(self):
@@ -73,7 +92,7 @@ class blueBlock(pygame.sprite.Sprite):
     def update(self):
         if BlockCreating == True:
             mouseX, mouseY = pygame.mouse.get_pos()
-            dictBlockVariable[bigHexBlue].rect.center = (mouseX,mouseY) 
+            newBlock.rect.center = (mouseX,mouseY) 
 
 class violetBlock(pygame.sprite.Sprite):
     def __init__(self):
@@ -89,7 +108,7 @@ class violetBlock(pygame.sprite.Sprite):
     def update(self):
         if BlockCreating == True:
             mouseX, mouseY = pygame.mouse.get_pos()
-            dictBlockVariable[bigHexViolet].rect.center = (mouseX,mouseY)
+            newBlock.rect.center = (mouseX,mouseY)
 
 class greenBlock(pygame.sprite.Sprite):
     def __init__(self):
@@ -106,7 +125,7 @@ class greenBlock(pygame.sprite.Sprite):
     def update(self):
         if BlockCreating == True:
             mouseX, mouseY = pygame.mouse.get_pos()
-            dictBlockVariable[bigHexGreen].rect.center = (mouseX,mouseY)
+            newBlock.rect.center = (mouseX,mouseY)
 
 class whiteBlock(pygame.sprite.Sprite):
     def __init__(self):
@@ -116,10 +135,10 @@ class whiteBlock(pygame.sprite.Sprite):
         self.rect.center = (blockWidth/2, blockHeight/2)
         self.weight = 10
 
-        def update(self):
-            if BlockCreating == True:
-                mouseX, mouseY = pygame.mouse.get_pos()
-                dictBlockVariable[bigHexWhite].rect.center = (mouseX,mouseY)
+    def update(self):
+        if BlockCreating == True:
+            mouseX, mouseY = pygame.mouse.get_pos()
+            newBlock.rect.center = (mouseX,mouseY)
 
 ################### ARRAY ###################
 Plateau = [[None]*5 for i in range(7)]      
@@ -157,57 +176,87 @@ while running:
     for event in pygame.event.get():    
         if event.type == pygame.QUIT:
             running = False
+        # MOUSE BUTTON DOWN
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                print('click gauche pressed')
-                for blockClass in dictBlockClass:
-                    if blockClass.get_rect().collidepoint(pygame.mouse.get_pos()):
-                        print('blockClass',blockClass)
-                        print('dictBlockClass[blockClass]',dictBlockClass[blockClass])
-                        print('dictBlockVariable[blockClass]',dictBlockVariable[blockClass])
-                        pygame.mouse.set_pos(100 + (blockWidth/2), 100 + (blockHeight/2))
-                        dictBlockVariable[blockClass] = dictBlockClass[blockClass]
-                        all_sprites.add(dictBlockVariable[blockClass])    
-                        BlockCreating = True
-                for i in range(7):
-                    for j in range(5):
-                        if PlateauBlock[i][j] != None:
-                            if PlateauBlock[i][j].rect.collidepoint(pygame.mouse.get_pos()):
-                                print(PlateauBlock[i][j].condition)
+                if bigHexRedRect.collidepoint(pygame.mouse.get_pos()):
+                    print('Red')
+                    pygame.mouse.set_pos(bigHexRedRect.center)
+                    newBlock = redBlock()
+                    all_sprites.add(newBlock)    
+                    BlockCreating = True
+                if bigHexBlueRect.collidepoint(pygame.mouse.get_pos()):
+                    print('Blue')  
+                    pygame.mouse.set_pos(bigHexBlueRect.center) 
+                    newBlock = blueBlock()
+                    all_sprites.add(newBlock)    
+                    BlockCreating = True
+                if bigHexVioletRect.collidepoint(pygame.mouse.get_pos()):
+                    print('Violet')
+                    pygame.mouse.set_pos(bigHexVioletRect.center)
+                    newBlock = violetBlock()
+                    all_sprites.add(newBlock)    
+                    BlockCreating = True
+                if bigHexGreenRect.collidepoint(pygame.mouse.get_pos()):
+                    print('green')
+                    pygame.mouse.set_pos(bigHexGreenRect.center)
+                    newBlock = greenBlock()
+                    all_sprites.add(newBlock)    
+                    BlockCreating = True
+                if bigHexWhiteRect.collidepoint(pygame.mouse.get_pos()):
+                    print('white') 
+                    pygame.mouse.set_pos(bigHexWhiteRect.center)
+                    newBlock = whiteBlock()
+                    all_sprites.add(newBlock)    
+                    BlockCreating = True
+            
+            # Display Block information
+            for i in range(7):
+                for j in range(5):
+                    if PlateauBlock[i][j] != None:
+                        if PlateauBlock[i][j].rect.collidepoint(pygame.mouse.get_pos()):
+                            print(PlateauBlock[i][j].condition)
+        # MOUSE BUTTON UP
         if event.type == pygame.MOUSEBUTTONUP and BlockCreating == True:
             k=0
             up=False
-            for i in range(7):               
-                if up == True:
-                    k+=50
-                    up = False
-                else:
-                    k-=50  
-                    up = True  
-                for j in range(5):
-                    if PlateauBlock[i][j] == None:
-                        if Plateau[i][j].collidepoint(pygame.mouse.get_pos()): 
-                            newBlock.rect.center = Plateau[i][j].center
-                            print(Plateau[i][j])
-                            PlateauBlock[i][j] = newBlock
-                            BlockCreating = False
-                        else:
-                            newBlock.kill()
-                            BlockCreating = False
+            for i in range(7): 
+                if BlockCreating == True:  
+                    if up == True:
+                        k+=50
+                        up = False
                     else:
-                        print('A block is already here')   
-                        newBlock.kill()
-                        BlockCreating = False     
+                        k-=50  
+                        up = True  
+                    for j in range(5):
+                        print(newBlock)
+                        if BlockCreating == True:
+                            print(i,j)
+                            if Plateau[i][j].collidepoint(pygame.mouse.get_pos()):
+                                if PlateauBlock[i][j] == None: 
+                                    newBlock.rect.center = Plateau[i][j].center
+                                    print(Plateau[i][j])
+                                    PlateauBlock[i][j] = newBlock
+                                    newBlock = None
+                                    BlockCreating = False                            
+                                else:
+                                    newBlock.kill()
+                                    newBlock = None
+                                    BlockCreating = False
+            if BlockCreating == True:
+                newBlock.kill()
+                newBlock = None
+                BlockCreating = False        
 
     ################### Update ###################
     all_sprites.update()
     #################### DRAW ####################
     window.fill(GREY)
-    window.blit(bigHexGreen, (greenBlockPositionX, greenBlockPositionY))
-    window.blit(bigHexRed, (redBlockPositionX, redBlockPositionY))
-    window.blit(bigHexBlue, (blueBlockPositionX, blueBlockPositionY))
-    window.blit(bigHexViolet, (violetBlockPositionX, violetBlockPositionY))
-    window.blit(bigHexWhite, (whiteBlockPositionX, whiteBlockPositionY))
+    window.blit(bigHexGreen, bigHexGreenRect)
+    window.blit(bigHexRed, bigHexRedRect)
+    window.blit(bigHexBlue, bigHexBlueRect)
+    window.blit(bigHexViolet, bigHexVioletRect)
+    window.blit(bigHexWhite, bigHexWhiteRect)
 
     all_sprites.draw(window)
     # Tableau
