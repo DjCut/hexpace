@@ -1,162 +1,104 @@
 import pygame
+import math
 
 pygame.init()
 
 ################# VARIABLES #################
-# colors
-GREY = (155,155,155)
-BLUE = (0,90,130)
 # display
 WIDTH = 1024
 HEIGHT = 576
-# block size
-blockWidth = 116
-blockHeight = 100
-# block position
-greenBlockPositionX = WIDTH - WIDTH + 20
-greenBlockPositionY = HEIGHT * 0.01
-redBlockPositionX = WIDTH - WIDTH + 20
-redBlockPositionY = HEIGHT * 0.21
-blueBlockPositionX = WIDTH - WIDTH + 20
-blueBlockPositionY = HEIGHT * 0.41
-violetBlockPositionX = WIDTH - WIDTH + 20
-violetBlockPositionY = HEIGHT * 0.61
-whiteBlockPositionX = WIDTH - WIDTH + 20
-whiteBlockPositionY = HEIGHT * 0.81
-# credits
-money = 30
 
-BlockCreating = False
-mouseHoverARectangle = False 
+BLACK = (0,0,0)
+GREEN = (0,255,0)
+
 
 ############### Pygame Window ###############
+pygame.display.set_caption('Xspace')
 window = pygame.display.set_mode((WIDTH, HEIGHT))
-window.fill(GREY)#color background
+window.fill(BLACK)
+clock = pygame.time.Clock()
 
-#################Images Load ################
-bigHexRed = pygame.image.load("/home/ludwig/hexpace/bigHexRed.png").convert_alpha()
-bigHexRedRect = bigHexRed.get_rect()
-bigHexRedRect.x = redBlockPositionX
-bigHexRedRect.y = redBlockPositionY
 
-bigHexBlue = pygame.image.load("/home/ludwig/hexpace/bigHexBlue.png").convert_alpha()
-bigHexBlueRect = bigHexBlue.get_rect()
-bigHexBlueRect.x = blueBlockPositionX
-bigHexBlueRect.y = blueBlockPositionY
-
-bigHexGreen = pygame.image.load("/home/ludwig/hexpace/bigHexGreen.png").convert_alpha()
-bigHexGreenRect = bigHexGreen.get_rect()
-bigHexGreenRect.x = greenBlockPositionX
-bigHexGreenRect.y = greenBlockPositionY
-
-bigHexViolet = pygame.image.load("/home/ludwig/hexpace/bigHexViolet.png").convert_alpha()
-bigHexVioletRect = bigHexViolet.get_rect()
-bigHexVioletRect.x = violetBlockPositionX
-bigHexVioletRect.y = violetBlockPositionY
-
-bigHexWhite = pygame.image.load("/home/ludwig/hexpace/bigHexWhite.png").convert_alpha()
-bigHexWhiteRect = bigHexWhite.get_rect()
-bigHexWhiteRect.x = whiteBlockPositionX
-bigHexWhiteRect.y = whiteBlockPositionY
+#################Content Load ################
+player_img = pygame.image.load("/Users/ludwigdanvin/others/hexpace/img/vessel.png").convert_alpha()
 
 ################### CLASS ###################
-class redBlock(pygame.sprite.Sprite):
-    def __init__(self):
+
+class vessel(pygame.sprite.Sprite):
+    def __init__(self, name):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexRed, (blockWidth, blockHeight))
+        self._image_master = player_img
+        self.image = self._image_master
         self.rect = self.image.get_rect()
-        self.rect.center = (blockWidth/2, blockHeight/2)
-        self.name = 'weapon'
+        self.orientation = 0
+        self.vector_x = 0.0
+        self.vector_y = 0.0
+        self.inertia_x = 0.0
+        self.inertia_y = 0.0
+
+        self.name = name
         self.condition = 5
         self.power = 1
         self.speed = 1 
         self.firingRate = 1
         self.weight = 10
-
-    def update(self):
-        if BlockCreating == True:
-            mouseX, mouseY = pygame.mouse.get_pos()
-            newBlock.rect.center = (mouseX,mouseY)
-
-class blueBlock(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexBlue, (blockWidth, blockHeight))
-        self.rect = self.image.get_rect()
-        self.rect.center = (blockWidth/2, blockHeight/2)
-        self.name = 'motor'
-        self.condition = 5
-        self.power = 1  
-        self.weight = 10
-
-    def update(self):
-        if BlockCreating == True:
-            mouseX, mouseY = pygame.mouse.get_pos()
-            newBlock.rect.center = (mouseX,mouseY) 
-
-class violetBlock(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexViolet, (blockWidth, blockHeight))
-        self.rect = self.image.get_rect()
-        self.rect.center = (blockWidth/2, blockHeight/2)
-        self.name = 'shield'
-        self.condition = 5
-        self.reloadSpeed = 1 
-        self.weight = 10
-
-    def update(self):
-        if BlockCreating == True:
-            mouseX, mouseY = pygame.mouse.get_pos()
-            newBlock.rect.center = (mouseX,mouseY)
-
-class greenBlock(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexGreen, (blockWidth, blockHeight))
-        self.rect = self.image.get_rect()
-        self.rect.center = (blockWidth/2, blockHeight/2)
-        self.name = 'tank'
-        self.condition = 5
-        self.storageCapacity = 1
-        self.refillSpeed = 1
-        self.weight = 10
     
-    def update(self):
-        if BlockCreating == True:
-            mouseX, mouseY = pygame.mouse.get_pos()
-            newBlock.rect.center = (mouseX,mouseY)
+    def get_vector(self):
+        self.vector_x = round(math.sin(math.radians(self.orientation)),2)
+        self.vector_y = round(math.cos(math.radians(self.orientation)),2)
 
-class whiteBlock(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(bigHexWhite, (blockWidth, blockHeight))
+    def run_engine(self):
+        self.inertia_x += self.vector_x
+        self.inertia_y += self.vector_y
+        self.inertia_x = round(self.inertia_x, 1)
+        self.inertia_y = round(self.inertia_y, 1)
+    
+    def turnLeft(self):
+        self.orientation += 5
+        if self.orientation > 360:
+            self.orientation = 5
+        self.update_orientation()
+        self.get_vector()
+
+    def turnRight(self):
+        self.orientation -= 5
+        if self.orientation < 0:
+            self.orientation = 355
+        self.update_orientation()
+        self.get_vector()
+
+    def update_orientation(self):
+        oldCenter = self.rect.center
+        self.image = pygame.transform.rotozoom(self._image_master, self.orientation, 1)
         self.rect = self.image.get_rect()
-        self.rect.center = (blockWidth/2, blockHeight/2)
-        self.weight = 10
+        self.rect.center = oldCenter
 
     def update(self):
-        if BlockCreating == True:
-            mouseX, mouseY = pygame.mouse.get_pos()
-            newBlock.rect.center = (mouseX,mouseY)
+        # Move FORWARD
+        self.rect.x += (self.inertia_x)
+        self.rect.y += (self.inertia_y)
+        if self.rect.x < 0: 
+            self.rect.x = 0
+            self.inertia_x = 1
+        if self.rect.x > window.get_width(): 
+            self.rect.x = window.get_width()
+            self.inertia_x = -1
+        if self.rect.y < 0: 
+            self.rect.y = 0
+            self.inertia_y = 1
+        if self.rect.y > window.get_height(): 
+            self.rect.y = window.get_height()
+            self.inertia_y = -1
 
-################### ARRAY ###################
-Plateau = [[None]*5 for i in range(7)]      
-PlateauBlock = [[None]*5 for i in range(7)]
-dictBlockClass =    {
-                    bigHexRed: redBlock(), 
-                    bigHexBlue: blueBlock(), 
-                    bigHexGreen: greenBlock(), 
-                    bigHexViolet: violetBlock(),
-                    bigHexWhite: whiteBlock()
-                    }
-dictBlockVariable = {
-                    bigHexRed: 'newRedBlock', 
-                    bigHexBlue: 'newBlueBlock', 
-                    bigHexGreen: 'newGreenBlock', 
-                    bigHexViolet: 'newVioletBlock',
-                    bigHexWhite: 'newWhiteBlock'
-                    }                    
+
+
+class TextBox(pygame.sprite.Sprite):
+    def __init__(self):
+        self.font = pygame.font.Font('Spaceport_2006.otf', 8)
+    
+    def display(self, orientation, vector_x, vector_y, inertia_x, inertia_y, rect_x, rect_y):
+        self.message = self.font.render(f">Orientation: {player.orientation} >Vector_x: {player.vector_x} >Vector_y: {player.vector_y} >intertia_x: {player.inertia_x} >inertia_y: {player.inertia_y} >rect.x: {player.rect.x} >rect.y: {player.rect.y}", True, GREEN, BLACK)
+        self.message_rect = self.message.get_rect()
 
 ################# Sprite Group #################
 all_sprites = pygame.sprite.Group()
@@ -171,111 +113,47 @@ pygame.display.update()
 
 #################################################
 ################### MAIN LOOP ###################
+text_box = TextBox()
+player = vessel('player')
+
+player.rect.x = 200
+player.rect.y = 200
+
 running = True
 while running:
+
+    clock.tick(30)
+
     for event in pygame.event.get():    
         if event.type == pygame.QUIT:
             running = False
-        # MOUSE BUTTON DOWN
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                if bigHexRedRect.collidepoint(pygame.mouse.get_pos()):
-                    print('Red')
-                    pygame.mouse.set_pos(bigHexRedRect.center)
-                    newBlock = redBlock()
-                    all_sprites.add(newBlock)    
-                    BlockCreating = True
-                if bigHexBlueRect.collidepoint(pygame.mouse.get_pos()):
-                    print('Blue')  
-                    pygame.mouse.set_pos(bigHexBlueRect.center) 
-                    newBlock = blueBlock()
-                    all_sprites.add(newBlock)    
-                    BlockCreating = True
-                if bigHexVioletRect.collidepoint(pygame.mouse.get_pos()):
-                    print('Violet')
-                    pygame.mouse.set_pos(bigHexVioletRect.center)
-                    newBlock = violetBlock()
-                    all_sprites.add(newBlock)    
-                    BlockCreating = True
-                if bigHexGreenRect.collidepoint(pygame.mouse.get_pos()):
-                    print('green')
-                    pygame.mouse.set_pos(bigHexGreenRect.center)
-                    newBlock = greenBlock()
-                    all_sprites.add(newBlock)    
-                    BlockCreating = True
-                if bigHexWhiteRect.collidepoint(pygame.mouse.get_pos()):
-                    print('white') 
-                    pygame.mouse.set_pos(bigHexWhiteRect.center)
-                    newBlock = whiteBlock()
-                    all_sprites.add(newBlock)    
-                    BlockCreating = True
-            
-            # Display Block information
-            for i in range(7):
-                for j in range(5):
-                    if PlateauBlock[i][j] != None:
-                        if PlateauBlock[i][j].rect.collidepoint(pygame.mouse.get_pos()):
-                            print(PlateauBlock[i][j].condition)
-        # MOUSE BUTTON UP
-        if event.type == pygame.MOUSEBUTTONUP and BlockCreating == True:
-            k=0
-            up=False
-            for i in range(7): 
-                if BlockCreating == True:  
-                    if up == True:
-                        k+=50
-                        up = False
-                    else:
-                        k-=50  
-                        up = True  
-                    for j in range(5):
-                        print(newBlock)
-                        if BlockCreating == True:
-                            print(i,j)
-                            if Plateau[i][j].collidepoint(pygame.mouse.get_pos()):
-                                if PlateauBlock[i][j] == None: 
-                                    newBlock.rect.center = Plateau[i][j].center
-                                    print(Plateau[i][j])
-                                    PlateauBlock[i][j] = newBlock
-                                    newBlock = None
-                                    BlockCreating = False                            
-                                else:
-                                    newBlock.kill()
-                                    newBlock = None
-                                    BlockCreating = False
-            if BlockCreating == True:
-                newBlock.kill()
-                newBlock = None
-                BlockCreating = False        
+        # FORWARD
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_w:
+                player.get_vector()
+                player.run_engine()
+                print(player.vector_x)
+                print(player.vector_y)
+
+        keys_pressed = pygame.key.get_pressed()
+        if keys_pressed[pygame.K_d]:
+            player.turnRight()
+        if keys_pressed[pygame.K_a]:
+            player.turnLeft()
 
     ################### Update ###################
-    all_sprites.update()
-    #################### DRAW ####################
-    window.fill(GREY)
-    window.blit(bigHexGreen, bigHexGreenRect)
-    window.blit(bigHexRed, bigHexRedRect)
-    window.blit(bigHexBlue, bigHexBlueRect)
-    window.blit(bigHexViolet, bigHexVioletRect)
-    window.blit(bigHexWhite, bigHexWhiteRect)
+    #all_sprites.update()
+    player.update()
 
-    all_sprites.draw(window)
-    # Tableau
-    k=0
-    up=False
-    for i in range(7):
-        if up == True:
-            k+=blockHeight/2
-            up = False
-        else:
-            k-=blockHeight/2  
-            up = True  
-        for j in range(5):
-            if PlateauBlock[i][j] != None:
-                all_sprites.add(PlateauBlock[i][j])
-            else:
-                Plateau[i][j] = pygame.draw.rect(window,BLUE,((i*87)+200,(j*100)+100+k,blockWidth/2,blockHeight/2))
+    #################### DRAW ####################
+    window.fill(BLACK)
+    window.blit(player.image, player.rect)
+
+    text_box.display(player.orientation, player.vector_x, player.vector_y, player.inertia_x, player.inertia_y, player.rect.x, player.rect.y)
+    window.blit(text_box.message, text_box.message_rect)
+
+    #all_sprites.draw(window)
                 
-    
     ############### Refresh window ###############
     pygame.display.update()
 
